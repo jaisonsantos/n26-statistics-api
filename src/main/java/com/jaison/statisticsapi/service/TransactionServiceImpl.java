@@ -31,13 +31,11 @@ public class TransactionServiceImpl implements TransactionService {
 
             if (modelOlderThan60Sec(transaction)) {
                 responseMessage = new ResponseMessageDto(HttpStatus.NO_CONTENT, null);
+            } else if (isInTheFuture(transaction)) {
+                responseMessage = new ResponseMessageDto(HttpStatus.UNPROCESSABLE_ENTITY, VALIDATION_TRANSACTION_IS_IN_THE_FUTURE);
             } else {
                 service.addTransaction(transaction);
                 responseMessage = new ResponseMessageDto(HttpStatus.CREATED, null);
-            }
-
-            if (isInTheFuture(transaction)) {
-                responseMessage = new ResponseMessageDto(HttpStatus.UNPROCESSABLE_ENTITY, VALIDATION_TRANSACTION_IS_IN_THE_FUTURE);
             }
 
         } catch (ValidationException ve) {

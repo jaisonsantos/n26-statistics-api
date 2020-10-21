@@ -41,14 +41,20 @@ public class StatisticsManagementServiceImpl implements StatisticsManagementServ
                 BigDecimal.ZERO,
                 0L);
 
+        if (TRANSACTION_LIST.isEmpty()) {
+            return scaleTheResult(new Statistics(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 0L));
+        }
+
         TRANSACTION_LIST.stream()
                 .filter(transaction -> transaction.getTimestamp().isAfter(OffsetDateTime.now().minusSeconds(timeWindow)))
                 .forEach(transaction -> doTheMaths(accumulated, transaction.getAmount()));
+
         return scaleTheResult(accumulated);
     }
 
     private Statistics scaleTheResult(Statistics statistics) {
         Statistics scaled = new Statistics();
+
         scaled.setAvg(statistics.getAvg().setScale(2, BigDecimal.ROUND_UP));
         scaled.setMax(statistics.getMax().setScale(2, BigDecimal.ROUND_UP));
         scaled.setMin(statistics.getMin().setScale(2, BigDecimal.ROUND_UP));
