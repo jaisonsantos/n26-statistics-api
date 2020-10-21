@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jaison.statisticsapi.model.Transaction;
 import com.jaison.statisticsapi.service.StatisticsManagementService;
-import com.jaison.statisticsapi.service.StatisticsManagementServiceImpl;
 import com.jaison.statisticsapi.service.TransactionService;
 import com.jaison.statisticsapi.service.TransactionServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,15 +16,19 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.OffsetDateTime;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class TransactionControllerTest {
 
     private static final String CREATE_TRANSACTIONS_URL = "/transactions";
-    private final StatisticsManagementService statisticsManagementService = new StatisticsManagementServiceImpl();
+    private final StatisticsManagementService statisticsManagementService = mock(StatisticsManagementService.class);
     private final TransactionService statisticsService = new TransactionServiceImpl(statisticsManagementService);
     private MockMvc mvc;
 
@@ -38,9 +41,12 @@ class TransactionControllerTest {
 
     @Test
     void returnStatusIsCreatedWhenCreateTransaction() throws Exception {
+        when(statisticsManagementService.isOlderThan(any())).thenReturn(false);
+        when(statisticsManagementService.isInTheFuture(any())).thenReturn(false);
+
         mvc.perform(MockMvcRequestBuilders
                 .post(CREATE_TRANSACTIONS_URL)
-                .content(asJsonString(new Transaction(BigDecimal.valueOf(23.54), OffsetDateTime.now())))
+                .content(asJsonString(new Transaction(BigDecimal.valueOf(23.54), OffsetDateTime.now(Clock.systemDefaultZone().getZone()))))
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isCreated());
@@ -58,6 +64,8 @@ class TransactionControllerTest {
 
     @Test
     void returnUnprocessableEntityWhenCreateTransaction() throws Exception {
+        when(statisticsManagementService.isOlderThan(any())).thenReturn(false);
+        when(statisticsManagementService.isInTheFuture(any())).thenReturn(true);
         mvc.perform(MockMvcRequestBuilders
                 .post(CREATE_TRANSACTIONS_URL)
                 .content(asJsonString(new Transaction(BigDecimal.valueOf(23.54), OffsetDateTime.now().plusDays(20))))

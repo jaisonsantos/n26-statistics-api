@@ -5,7 +5,6 @@ import com.jaison.statisticsapi.model.Transaction;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -88,13 +87,15 @@ public class StatisticsManagementServiceImpl implements StatisticsManagementServ
     }
 
     @Override
-    public boolean isOlderThan(Instant instant) {
-        return instant.isBefore(Instant.now().minusSeconds(CONDITION_SECONDS));
+    public boolean isOlderThan(OffsetDateTime offsetDateTime) {
+        return System.currentTimeMillis() -
+                offsetDateTime.toLocalDateTime().toInstant(OffsetDateTime.now().getOffset()).toEpochMilli() > CONDITION_SECONDS * 1000;
     }
 
     @Override
-    public boolean isInTheFuture(Instant instant) {
-        return instant.isAfter(Instant.now());
+    public boolean isInTheFuture(OffsetDateTime offsetDateTime) {
+        return System.currentTimeMillis()
+                - offsetDateTime.toLocalDateTime().toInstant(OffsetDateTime.now().getOffset()).toEpochMilli() < 0;
     }
 
     private BigDecimal calculateAverage(BigDecimal amount, long count) {

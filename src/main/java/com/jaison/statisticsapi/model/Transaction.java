@@ -5,11 +5,8 @@ import java.time.OffsetDateTime;
 
 public class Transaction {
 
-    private BigDecimal amount;
-    private OffsetDateTime timestamp;
-
-    public Transaction() {
-    }
+    private final BigDecimal amount;
+    private final OffsetDateTime timestamp;
 
     public Transaction(BigDecimal amount, OffsetDateTime timestamp) {
         this.amount = amount;
@@ -20,15 +17,8 @@ public class Transaction {
         return amount;
     }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
-    }
-
     public OffsetDateTime getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(OffsetDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
 }

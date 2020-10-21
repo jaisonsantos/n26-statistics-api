@@ -16,6 +16,4 @@ public class ValidationException extends RuntimeException {
 	public void setErrorMessage(String errorMessage) {
 		this.errorMessage = errorMessage;
 	}
-
-
 }

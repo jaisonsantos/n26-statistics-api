@@ -6,8 +6,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 import static com.jaison.statisticsapi.service.StatisticsManagementServiceImpl.CONDITION_SECONDS;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
@@ -59,12 +60,12 @@ class StatisticsManagementServiceImplTest {
     }
 
     @Test
-    void isOlderThan() {
+    void isOlderThan() throws InterruptedException {
         //Given
-        Instant olderInstant = Instant.now().minusSeconds(CONDITION_SECONDS + 1);
+        OffsetDateTime offsetDateTime = OffsetDateTime.now(Clock.systemDefaultZone().getZone()).minusSeconds(CONDITION_SECONDS + 1);
 
         //When
-        boolean isOlder = statisticsManagementService.isOlderThan(olderInstant);
+        boolean isOlder = statisticsManagementService.isOlderThan(offsetDateTime);
 
         //Then
         assertThat(isOlder).isTrue();
@@ -73,10 +74,10 @@ class StatisticsManagementServiceImplTest {
     @Test
     void isInTheFuture() {
         //Given
-        Instant futureInstant = Instant.now().plusSeconds(1);
+        OffsetDateTime futureOffsetDateTime = OffsetDateTime.of(9999, 12, 31, 12, 45, 10, 0, ZoneOffset.UTC);
 
         //When
-        boolean isInTheFuture = statisticsManagementService.isInTheFuture(futureInstant);
+        boolean isInTheFuture = statisticsManagementService.isInTheFuture(futureOffsetDateTime);
 
         //Then
         assertThat(isInTheFuture).isTrue();

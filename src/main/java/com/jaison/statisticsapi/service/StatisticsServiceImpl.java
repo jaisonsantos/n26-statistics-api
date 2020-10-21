@@ -19,6 +19,5 @@ public class StatisticsServiceImpl implements StatisticsService {
     public Statistics getStatistics() {
         LOGGER.debug("Last minute statistics");
         return statisticsManagementService.getLastMinuteStatistic();
-
     }
 }

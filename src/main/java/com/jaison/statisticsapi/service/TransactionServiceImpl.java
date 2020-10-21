@@ -51,11 +51,11 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     private boolean modelOlderThan60Sec(Transaction transaction) {
-        return service.isOlderThan(transaction.getTimestamp().toInstant());
+        return service.isOlderThan(transaction.getTimestamp());
     }
 
     private boolean isInTheFuture(Transaction transaction) {
-        return service.isInTheFuture(transaction.getTimestamp().toInstant());
+        return service.isInTheFuture(transaction.getTimestamp());
     }
 
     private void validate(Transaction transaction) {
