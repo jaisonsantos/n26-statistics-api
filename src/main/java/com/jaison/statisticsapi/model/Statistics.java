@@ -6,13 +6,21 @@ import java.util.StringJoiner;
 
 public class Statistics {
 
-    private BigDecimal sum = BigDecimal.valueOf(0);
-    private BigDecimal max = BigDecimal.valueOf(Double.MIN_VALUE);
-    private BigDecimal min = BigDecimal.valueOf(Double.MAX_VALUE);
-    private BigDecimal avg = BigDecimal.valueOf(0);
-    private long count = 0L;
+    private BigDecimal sum;
+    private BigDecimal max;
+    private BigDecimal min;
+    private BigDecimal avg;
+    private long count;
 
     public Statistics() {
+    }
+
+    public Statistics(BigDecimal sum, BigDecimal max, BigDecimal min, BigDecimal avg, long count) {
+        this.sum = sum;
+        this.max = max;
+        this.min = min;
+        this.avg = avg;
+        this.count = count;
     }
 
     public BigDecimal getSum() {

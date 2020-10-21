@@ -1,7 +1,6 @@
 package com.jaison.statisticsapi.model;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.OffsetDateTime;
 
 public class Transaction {
@@ -12,20 +11,24 @@ public class Transaction {
     public Transaction() {
     }
 
-    public Transaction(String amount, OffsetDateTime timestamp) {
-        this.amount = setScale(new BigDecimal(amount));
+    public Transaction(BigDecimal amount, OffsetDateTime timestamp) {
+        this.amount = amount;
         this.timestamp = timestamp;
-    }
-
-    public BigDecimal setScale(BigDecimal amount) {
-        return amount.setScale(2, RoundingMode.HALF_UP);
     }
 
     public BigDecimal getAmount() {
         return amount;
     }
 
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
     public OffsetDateTime getTimestamp() {
         return timestamp;
+    }
+
+    public void setTimestamp(OffsetDateTime timestamp) {
+        this.timestamp = timestamp;
     }
 }

@@ -3,7 +3,7 @@ package com.jaison.statisticsapi.service;
 import com.jaison.statisticsapi.model.Statistics;
 import com.jaison.statisticsapi.model.Transaction;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public interface StatisticsManagementService {
 
@@ -13,5 +13,7 @@ public interface StatisticsManagementService {
 
     void deleteStatistics();
 
-    boolean isOlderThan(OffsetDateTime offsetDateTime);
+    boolean isOlderThan(Instant instant);
+
+    boolean isInTheFuture(Instant instant);
 }

@@ -7,5 +7,5 @@ public interface TransactionService {
 
     ResponseMessageDto addTransaction(Transaction transaction);
 
-    void deleteTransactions();
+    void deleteAllTransactions();
 }

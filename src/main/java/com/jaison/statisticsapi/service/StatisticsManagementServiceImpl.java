@@ -5,55 +5,98 @@ import com.jaison.statisticsapi.model.Transaction;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Component
 public class StatisticsManagementServiceImpl implements StatisticsManagementService {
 
-    private static final int CONDITION_SECONDS = 60;
-    private static Map<Instant, Transaction> allTransactions = new ConcurrentHashMap<>();
+    protected static final int CONDITION_SECONDS = 60;
+    private static final List<Transaction> TRANSACTION_LIST = Collections.synchronizedList(new ArrayList<>());
 
     @Override
     public void addTransaction(Transaction transaction) {
-        allTransactions.put(Instant.now(), transaction);
+        TRANSACTION_LIST.add(transaction);
     }
 
+    /**
+     * This method filter the last CONDITION_SECONDS seconds and
+     * then calculates the statistics summary
+     *
+     * @return Statistics object with the relevant data
+     */
     @Override
     public Statistics getLastMinuteStatistic() {
-        Statistics accumulated = new Statistics();
-        allTransactions.entrySet().stream()
-                //the stored instant  is greater or equals to now - 60
-                .filter(entry -> entry.getKey().isAfter(Instant.now().minusSeconds(CONDITION_SECONDS)))
-                .map(Map.Entry::getValue)
-                .forEach(transaction -> doTheMaths(accumulated, transaction));
-        return accumulated;
+        return getStatisticsByTimeWindowInSecondsFromNow(CONDITION_SECONDS);
     }
 
-    private void doTheMaths(Statistics accumulated, Transaction transaction) {
-        accumulated.setSum(setScale(accumulated.getSum().add(transaction.getAmount())));
-        accumulated.setMax(setScale(accumulated.getMax().max(transaction.getAmount())));
-        accumulated.setMin(setScale(accumulated.getMin().min(transaction.getAmount())));
+    private Statistics getStatisticsByTimeWindowInSecondsFromNow(long timeWindow) {
+        Statistics accumulated = new Statistics(
+                BigDecimal.ZERO,
+                BigDecimal.valueOf(Double.MIN_VALUE),
+                BigDecimal.valueOf(Double.MAX_VALUE),
+                BigDecimal.ZERO,
+                0L);
+
+        TRANSACTION_LIST.stream()
+                .filter(transaction -> transaction.getTimestamp().isAfter(OffsetDateTime.now().minusSeconds(timeWindow)))
+                .forEach(transaction -> doTheMaths(accumulated, transaction.getAmount()));
+        return scaleTheResult(accumulated);
+    }
+
+    private Statistics scaleTheResult(Statistics statistics) {
+        Statistics scaled = new Statistics();
+        scaled.setAvg(statistics.getAvg().setScale(2, BigDecimal.ROUND_UP));
+        scaled.setMax(statistics.getMax().setScale(2, BigDecimal.ROUND_UP));
+        scaled.setMin(statistics.getMin().setScale(2, BigDecimal.ROUND_UP));
+        scaled.setSum(statistics.getSum().setScale(2, BigDecimal.ROUND_UP));
+        scaled.setCount(statistics.getCount());
+        return scaled;
+    }
+
+    /**
+     * Adds to the accumulated value the current amount, calculates the new max, min,
+     * and avg values and increases the counter of elements.
+     *
+     * @param accumulated Accumulated statistics object
+     * @param amount      Current BigDecimal amount
+     */
+    private void doTheMaths(Statistics accumulated, BigDecimal amount) {
+
+        accumulated.setSum(accumulated.getSum().add(amount));
+        accumulated.setMax(accumulated.getMax().max(amount));
+        accumulated.setMin(accumulated.getMin().min(amount));
 
         long count = accumulated.getCount() + 1;
-        accumulated.setCount(count++);
-        accumulated.setAvg(setScale(accumulated.getSum().divide(BigDecimal.valueOf(count), RoundingMode.HALF_UP)));
+        accumulated.setCount(count);
+
+        accumulated.setAvg(calculateAverage(accumulated.getSum(), count));
     }
 
     @Override
     public void deleteStatistics() {
-        allTransactions.clear();
+        TRANSACTION_LIST.clear();
     }
 
     @Override
-    public boolean isOlderThan(OffsetDateTime offsetDateTime) {
-        return offsetDateTime.isBefore(OffsetDateTime.now().minusSeconds(CONDITION_SECONDS));
+    public boolean isOlderThan(Instant instant) {
+        return instant.isBefore(Instant.now().minusSeconds(CONDITION_SECONDS));
     }
 
-    public BigDecimal setScale(BigDecimal amount) {
-        return amount.setScale(2, RoundingMode.CEILING);
+    @Override
+    public boolean isInTheFuture(Instant instant) {
+        return instant.isAfter(Instant.now());
+    }
+
+    private BigDecimal calculateAverage(BigDecimal amount, long count) {
+        return amount.divide(BigDecimal.valueOf(count));
+    }
+
+    //Method used for testing purposes
+    protected List<Transaction> getCollection() {
+        return TRANSACTION_LIST;
     }
 }

@@ -15,9 +15,6 @@ public class StatisticsServiceImpl implements StatisticsService {
         this.statisticsManagementService = statisticsManagementService;
     }
 
-    /**
-     * @return a combined statistics for the last minute
-     */
     @Override
     public Statistics getStatistics() {
         LOGGER.debug("Last minute statistics");

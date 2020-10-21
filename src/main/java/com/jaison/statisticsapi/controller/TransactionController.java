@@ -5,7 +5,6 @@ import com.jaison.statisticsapi.model.Transaction;
 import com.jaison.statisticsapi.service.TransactionService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -33,8 +32,8 @@ public class TransactionController {
     @DeleteMapping("/transactions")
     public ResponseEntity deleteTransactions() {
         LOGGER.debug("request for delete transaction received");
-        transactionService.deleteTransactions();
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+        transactionService.deleteAllTransactions();
+        return ResponseEntity.noContent().build();
 
     }
 }
