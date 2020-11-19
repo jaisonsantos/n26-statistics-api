@@ -18,7 +18,9 @@ public class StatisticsManagementServiceImpl implements StatisticsManagementServ
 
     @Override
     public void addTransaction(Transaction transaction) {
-        TRANSACTION_LIST.add(transaction);
+        synchronized (TRANSACTION_LIST) {
+            TRANSACTION_LIST.add(transaction);
+        }
     }
 
     /**
@@ -43,10 +45,12 @@ public class StatisticsManagementServiceImpl implements StatisticsManagementServ
         if (TRANSACTION_LIST.isEmpty()) {
             return scaleTheResult(new Statistics(BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, 0L));
         }
-
-        TRANSACTION_LIST.stream()
-                .filter(transaction -> transaction.getTimestamp().isAfter(OffsetDateTime.now().minusSeconds(timeWindow)))
-                .forEach(transaction -> doTheMaths(accumulated, transaction.getAmount()));
+        
+        synchronized (TRANSACTION_LIST) {
+            TRANSACTION_LIST.stream()
+                    .filter(transaction -> transaction.getTimestamp().isAfter(OffsetDateTime.now().minusSeconds(timeWindow)))
+                    .forEach(transaction -> doTheMaths(accumulated, transaction.getAmount()));
+        }
 
         return scaleTheResult(accumulated);
     }
